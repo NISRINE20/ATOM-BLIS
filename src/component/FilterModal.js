@@ -58,6 +58,15 @@ const FilterModal = ({ isOpen, onClose, filters, onFilterChange, setFilteredData
             />
           </label>
           <label style={modalStyles.label}>
+            Class:
+            <input
+              type="text"
+              value={filters.class2}
+              onChange={(e) => handleInputChange('class2', e.target.value)}
+              style={modalStyles.input}
+            />
+          </label>
+          <label style={modalStyles.label}>
             Date Received:
             <input
               type="date"

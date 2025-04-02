@@ -17,7 +17,7 @@ export const modalStyles = {
     padding: '20px',
     backgroundColor: '#fff',
     borderRadius: '8px',
-    width: '50%',
+    width: '45%',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
     animation: 'fadeIn 0.3s ease-in-out',
   },
@@ -35,21 +35,21 @@ export const modalStyles = {
   formGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '15px',
+    gap: '8px',
   },
   label: {
     display: 'block',
     fontWeight: 'bold',
     color: '#333',
-    marginLeft: '20px',
-    marginRight: '20px'
+    marginLeft: '15px',
+    marginRight: '15px'
   },
   input: {
     width: '100%',
     padding: '8px',
     border: '1px solid #ccc',
     borderRadius: '4px',
-    fontSize: '14px',
+    fontSize: '11px',
 
   },
   button: {

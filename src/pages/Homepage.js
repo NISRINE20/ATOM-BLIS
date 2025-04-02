@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -7,8 +7,9 @@ import ConfirmationModal from '../component/confirmationModal';
 import FilterModal from '../component/FilterModal';
 import SidebarComponent from './Sidebar';
 import Charts from './Charts';
-import { Container, Header, HeaderRight, Title, SearchBox, HelpText, MenuBar, TableContainer, Table, Th, Td, RecommendationItem, RecommendationModal, DownloadIcon, PaginationContainer, PaginationButton } from "../design/homepagedesign"
+import { Container, Header, HeaderRight, Title, SearchBox, HelpText, MenuBar, TableContainer, Table, Th, Td, RecommendationItem, RecommendationModal, DownloadIcon, PaginationContainer, PaginationButton, TableWrapper } from "../design/homepagedesign"
 import Chatbot from '../component/Chatbot';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // Import Font Awesome icons
 
 function UserPage() {
   const [showModal, setShowModal] = useState(false);
@@ -31,6 +32,7 @@ function UserPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     id: '',
+    material_category: '', // Added Material Category
     class: '', // Added Material Category
     date_received: '',
     title: '',
@@ -47,12 +49,31 @@ function UserPage() {
     remarks: ''
   });
 
+  const menuBarRef = useRef(null);
+  const tableRef = useRef(null);
+
+  useEffect(() => {
+    const syncMenuBarWidth = () => {
+      if (menuBarRef.current && tableRef.current) {
+        menuBarRef.current.style.width = `${tableRef.current.offsetWidth}px`;
+      }
+    };
+
+    // Sync width on mount, whenever the window resizes, or the current page changes
+    syncMenuBarWidth();
+    window.addEventListener('resize', syncMenuBarWidth);
+
+    return () => {
+      window.removeEventListener('resize', syncMenuBarWidth);
+    };
+  }, [currentPage]); // Add currentPage as a dependency
+
   useEffect(() => {
     // Fetch data from PHP API
     const fetchData = async () => {
       const response = await fetch('https://vynceianoani.helioho.st/bliss/getbook.php');
       const data = await response.json();
-      const sortedData = data.sort((a, b) => a.id - b.id);
+      const sortedData = data.sort((a, b) => b.id - a.id); // Sort in descending order by id
       setTableData(sortedData);
       setFilteredData(sortedData);
     };
@@ -145,14 +166,14 @@ function UserPage() {
   const handleAddMaterialsClick = () => {
     setShowModal(true);
   };
-
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const newData = {
       id: formData.get('id'),
       dateReceived: formData.get('dateReceived'),
-      class: formData.get('class'),
+      class: formData.get('class'), // This is the user-facing "class"
+      class2: formData.get('class2'), // Map "class" to "class2" for the database
       author: formData.get('author'),
       title: formData.get('title'),
       edition: formData.get('edition'),
@@ -164,7 +185,7 @@ function UserPage() {
       year: formData.get('year'),
       barcode: formData.get('barcode'),
       department: formData.get('department'),
-      remarks: formData.get('remarks')
+      remarks: formData.get('remarks'),
     };
   
     setFormData(newData);
@@ -201,13 +222,13 @@ function UserPage() {
     setIsModalOpen(false);
     // Send data to PHP API
     const formDataToSend = new FormData();
-    Object.keys(formData).forEach(key => formDataToSend.append(key, formData[key]));
-
+    Object.keys(formData).forEach((key) => formDataToSend.append(key, formData[key]));
+  
     const response = await fetch('https://vynceianoani.helioho.st/bliss/addbook.php', {
       method: 'POST',
       body: formDataToSend,
     });
-
+  
     if (response.ok) {
       const updatedTableData = [...tableData, formData];
       const sortedData = updatedTableData.sort((a, b) => a.id - b.id);
@@ -218,7 +239,6 @@ function UserPage() {
       console.error('Failed to add data');
     }
   };
-
   const handleDownloadClick = () => {
     setIsPasswordModalOpen(true);
   };
@@ -319,9 +339,8 @@ function UserPage() {
   };
 
   const columns = [
-    'NUMBER', 'DATE ACCESSION', 'MATERIAL CATEGORY', 'AUTHOR', 'TITLE OF BOOK', 'EDITION', 'VOLUME', 'PAGES', 'SOURCE OF FUND', 'COST', 'PUBLISHER', 'YEAR', 'BARCODE', 'PROGRAM', 'REMARKS',
+    'NUMBER', 'DATE ACCESSION', 'MATERIAL CATEGORY', 'CLASS', 'AUTHOR', 'TITLE OF BOOK', 'EDITION', 'VOLUME', 'PAGES', 'SOURCE OF FUND', 'COST PRICE', 'PUBLISHER', 'YEAR', 'BARCODE', 'PROGRAM', 'REMARKS',
   ];
-
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
@@ -385,57 +404,64 @@ function UserPage() {
               <HelpText>Help</HelpText>
             </HeaderRight>
           </Header>
-          <MenuBar>
-            <select value={activeTab} onChange={handleTabClick} style={{ marginRight: '10px' }}>
-              <option value="Remarks">All</option>
-              <option value="Lost">Lost</option>
-              <option value="Donate">Donate</option>
-              <option value="Damage">Damage</option>
-              <option value="Available">Available</option>
-            </select>
-            <DownloadIcon onClick={handleDownloadClick} />
-          </MenuBar>
-          <Table id="table">
-          <thead>
-              <tr>
-                {columns.map((column) => (
-                  <Th key={column}>{column}</Th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((row, index) => (
-                <tr key={index}>
-                  <Td>{row.id}</Td>
-                  <Td>{row.date_received}</Td>
-                  <Td>{row.class}</Td>
-                  <Td>{row.author}</Td>
-                  <Td>{row.title}</Td>
-                  <Td>{row.edition}</Td>
-                  <Td>{row.volume}</Td>
-                  <Td>{row.pages}</Td>
-                  <Td>{row.record_of_source}</Td>
-                  <Td>{row.cost_price}</Td>
-                  <Td>{row.publisher}</Td>
-                  <Td>{row.year}</Td>
-                  <Td>{row.barcode}</Td>
-                  <Td>{row.department}</Td>
-                  <Td>
-                    <select value={row.remarks} onChange={(e) => handleRemarksChange(e, row)}>
-                      <option value="Available">Available</option>
-                      <option value="Damage">Damage</option>
-                      <option value="Lost">Lost</option>
-                      <option value="Donate">Donate</option>
-                    </select>
-                  </Td>
+          <TableWrapper>
+            <MenuBar ref={menuBarRef}>
+              <select value={activeTab} onChange={handleTabClick} style={{ marginRight: '10px' }}>
+                <option value="Remarks">All</option>
+                <option value="Lost">Lost</option>
+                <option value="Donate">Donate</option>
+                <option value="Damage">Damage</option>
+                <option value="Available">Available</option>
+              </select>
+              <DownloadIcon onClick={handleDownloadClick} />
+            </MenuBar>
+            <Table id="table" ref={tableRef}>
+              <thead>
+                <tr>
+                  {columns.map((column) => (
+                    <Th key={column}>{column}</Th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+  {filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((row, index) => (
+    <tr key={index}>
+      <Td>{row.id}</Td>
+      <Td>{row.date_received}</Td>
+      <Td>{row.class}</Td> {/* Material Category */}
+      <Td>{row.class2}</Td> {/* Class column mapped to class2 */}
+      <Td>{row.author}</Td>
+      <Td>{row.title}</Td>
+      <Td>{row.edition}</Td>
+      <Td>{row.volume}</Td>
+      <Td>{row.pages}</Td>
+      <Td>{row.record_of_source}</Td>
+      <Td>₱{row.cost_price}</Td>
+      <Td>{row.publisher}</Td>
+      <Td>{row.year}</Td>
+      <Td>{row.barcode}</Td>
+      <Td>{row.department}</Td>
+      <Td>
+        <select value={row.remarks} onChange={(e) => handleRemarksChange(e, row)}>
+          <option value="Available">Available</option>
+          <option value="Damage">Damage</option>
+          <option value="Lost">Lost</option>
+          <option value="Donate">Donate</option>
+        </select>
+      </Td>
+    </tr>
+  ))}
+</tbody>
+            </Table>
+          </TableWrapper>
           <PaginationContainer>
-            <PaginationButton onClick={handlePreviousPage} disabled={currentPage === 1}>Previous</PaginationButton>
+            <PaginationButton onClick={handlePreviousPage} disabled={currentPage === 1}>
+              <FaChevronLeft /> {/* Previous icon */}
+            </PaginationButton>
             <span>Page {currentPage} of {totalPages}</span>
-            <PaginationButton onClick={handleNextPage} disabled={currentPage === totalPages}>Next</PaginationButton>
+            <PaginationButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+              <FaChevronRight /> {/* Next icon */}
+            </PaginationButton>
           </PaginationContainer>
         </TableContainer>
       )}

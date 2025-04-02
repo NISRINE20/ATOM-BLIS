@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line, Pie } from 'react-chartjs-2'; // Import Bar, Line, and Pie charts
 import axios from 'axios';
 import jsPDF from 'jspdf';
+import { useNavigate, useLocation } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { Container, Header, Title, DownloadIcon, ChartContainer } from '../design/chartdesign';
 import {
@@ -9,20 +10,27 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement, // Add this
+  ArcElement,
   Title as ChartTitle,
   Tooltip,
   Legend,
 } from 'chart.js';
+
 import { MenuBar } from '../design/homepagedesign';
 import SidebarComponent from './Sidebar';
-import { useNavigate, useLocation } from 'react-router-dom';
 import Modal from '../component/modal';
 import { ModalContent, Form, Input, ButtonContainer, Button } from '../design/modaldesign';
+
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement, // Register PointElement
+  ArcElement,
   ChartTitle,
   Tooltip,
   Legend
@@ -34,6 +42,7 @@ const Charts = ({ handleDownloadClick }) => {
   const [selectedClassification, setSelectedClassification] = useState('');
   const [filterType, setFilterType] = useState('Material Category'); // Default filter type
   const [timeFrame, setTimeFrame] = useState('Monthly'); // Default time frame
+  const [chartType, setChartType] = useState('Bar'); // Default chart type
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -149,6 +158,15 @@ const Charts = ({ handleDownloadClick }) => {
         <MenuBar>
           <DownloadIcon onClick={() => setIsPasswordModalOpen(true)} />
           <select
+            value={chartType}
+            onChange={(e) => setChartType(e.target.value)}
+            style={{ marginLeft: '20px' }}
+          >
+            <option value="Bar">Bar Graph</option>
+            <option value="Line">Line Graph</option>
+            <option value="Pie">Pie Chart</option>
+          </select>
+          <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
             style={{ marginLeft: '20px' }}
@@ -181,28 +199,79 @@ const Charts = ({ handleDownloadClick }) => {
           {selectedClassification && (
             <div style={{ marginBottom: '20px' }}>
               <h2>{selectedClassification}</h2>
-              <Bar
-                data={{
-                  labels: chartData[selectedClassification].labels,
-                  datasets: [{
-                    label: `Count per ${timeFrame} for ${selectedClassification}`,
-                    backgroundColor: "#1E90FF",
-                    data: chartData[selectedClassification].data,
-                  }],
-                }}
-                options={{
-                  responsive: true,
-                  scales: {
-                    y: {
-                      ticks: {
-                        callback: function(value) {
-                          return Number(value).toFixed(0); // Ensure whole numbers
+              <div style={{ width: '600px', height: '400px', margin: '0 auto' }}> {/* Consistent container size */}
+                {chartType === 'Bar' && (
+                  <Bar
+                    key={`Bar-${selectedClassification}`}
+                    data={{
+                      labels: chartData[selectedClassification].labels,
+                      datasets: [{
+                        label: `Count per ${timeFrame} for ${selectedClassification}`,
+                        backgroundColor: "#1E90FF",
+                        data: chartData[selectedClassification].data,
+                      }],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false, // Ensure it fits the container
+                      scales: {
+                        y: {
+                          ticks: {
+                            callback: function(value) {
+                              return Number(value).toFixed(0); // Ensure whole numbers
+                            }
+                          }
                         }
                       }
-                    }
-                  }
-                }}
-              />
+                    }}
+                  />
+                )}
+                {chartType === 'Line' && (
+                  <Line
+                    key={`Line-${selectedClassification}`}
+                    data={{
+                      labels: chartData[selectedClassification].labels,
+                      datasets: [{
+                        label: `Count per ${timeFrame} for ${selectedClassification}`,
+                        borderColor: "#1E90FF",
+                        backgroundColor: "rgba(30, 144, 255, 0.2)",
+                        data: chartData[selectedClassification].data,
+                        fill: true,
+                      }],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false, // Ensure it fits the container
+                      scales: {
+                        y: {
+                          ticks: {
+                            callback: function(value) {
+                              return Number(value).toFixed(0); // Ensure whole numbers
+                            }
+                          }
+                        }
+                      }
+                    }}
+                  />
+                )}
+                {chartType === 'Pie' && (
+                  <Pie
+                    key={`Pie-${selectedClassification}`}
+                    data={{
+                      labels: chartData[selectedClassification].labels,
+                      datasets: [{
+                        label: `Count per ${timeFrame} for ${selectedClassification}`,
+                        backgroundColor: chartData[selectedClassification].labels.map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`),
+                        data: chartData[selectedClassification].data,
+                      }],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false, // Ensure it fits the container
+                    }}
+                  />
+                )}
+              </div>
             </div>
           )}
         </ChartContainer>

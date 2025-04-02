@@ -33,7 +33,7 @@ function Login() {
   return (
     <Container>
       <LoginBox>
-        <Title>QuickShelf</Title>
+        <Title>AccessionX</Title>
         <p>SIGN IN</p>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <form onSubmit={handleLogin}>
@@ -55,8 +55,7 @@ function Login() {
           />
           <Button type="submit">Submit</Button>
         </form>
-        <Link href="#">Forgot Username?</Link>
-        <Link href="#" onClick={() => navigate('/forget')}>Forgot Password?</Link>
+        <Link href="#" onClick={() => navigate('/forget')}>Forgot Account?</Link>
       </LoginBox>
     </Container>
   );

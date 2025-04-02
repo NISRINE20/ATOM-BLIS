@@ -42,6 +42,13 @@ export const ChartContainer = styled.div`
   width: 80%;
   margin: auto;
   padding: 20px;
+  overflow-y: auto; /* Enable vertical scrolling for the chart content */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for WebKit browsers */
+  }
 `;
 export const ModalContent = styled.div`
   background: white;

@@ -9,20 +9,67 @@ const ReadOnlyInput = styled(Input)`
   pointer-events: none; /* Disable interactions */
 `;
 
+const InputWithPrefix = styled.div`
+  position: relative;
+  width: 100%;
+  margin: 10px 0;
+`;
+
+const PesoSign = styled.span`
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #888;
+`;
+
+const StyledInput = styled(Input)`
+  padding-left: 30px; /* Add space for the peso sign */
+`;
+
 const AddModal = ({ isOpen, onClose, onSubmit }) => {
   return (
     <Modal isOpen={isOpen}>
       <ModalContent>
         <Form onSubmit={onSubmit}>
           <Input type="date" name="dateReceived" placeholder="Date Accession" required />
-          <Input type="text" name="class" placeholder="Material Category" required />
+          <Select name="class" required>
+            <option value="">Material Category</option>
+            <option value="Gen. Ref">Gen. Ref</option>
+            <option value="Filipiniana">Filipiniana</option>
+            <option value="Circulation">Circulation</option>
+            <option value="Fiction">Fiction</option>
+          </Select>
+          {/* Hidden input to map class to class2 */}
+          <Select name="class" required>
+  <option value="">Class</option>
+  <option value="000-099">000 - 099</option>
+  <option value="100-199">100 - 199</option>
+  <option value="200-299">200 - 299</option>
+  <option value="300-399">300 - 399</option>
+  <option value="400-499">400 - 499</option>
+  <option value="500-599">500 - 599</option>
+  <option value="600-699">600 - 699</option>
+  <option value="700-799">700 - 799</option>
+  <option value="800-899">800 - 899</option>
+  <option value="900-999">900 - 999</option>
+</Select>
           <Input type="text" name="author" placeholder="Author" required />
           <Input type="text" name="title" placeholder="Title of Book" required />
           <Input type="text" name="edition" placeholder="Edition" required />
           <Input type="text" name="volume" placeholder="Volume" required />
           <Input type="number" name="pages" placeholder="Pages" required />
-          <Input type="text" name="recordOfSource" placeholder="Record of Source" required />
-          <Input type="text" name="costPrice" placeholder="Cost Price" required />
+          <Select name="recordOfSource" required>
+            <option value="">Source of Fund</option>
+            <option value="Purchased">Purchased</option>
+            <option value="Donated">Donated</option>
+          </Select>
+          {/* Cost Price with Peso Sign */}
+          <InputWithPrefix>
+            <PesoSign>₱</PesoSign>
+            <StyledInput type="text" name="costPrice" placeholder="Cost Price" required />
+          </InputWithPrefix>
           <Input type="text" name="publisher" placeholder="Publisher" required />
           <Input type="number" name="year" placeholder="Year" required />
           <Input type="text" name="barcode" placeholder="Barcode" required />
@@ -36,23 +83,23 @@ const AddModal = ({ isOpen, onClose, onSubmit }) => {
             <option value="BSHM">BSHM</option>
             <option value="BSTM">BSTM</option>
             <option value="BA POL-SCI">BA POL-SCI</option>
-            <option value="BACOMM - SPECIALIZING IN JOURNALISM AND BROADCASTING">BACOMM - SPECIALIZING IN JOURNALISM AND BROADCASTING</option>
+            <option value="BA COMM - SPECIALIZING IN JOURNALISM AND BROADCASTING">BA COMM - SPECIALIZING IN JOURNALISM AND BROADCASTING</option>
             <option value="BA COMM - SPECIALIZING IN NEW MEDIA STUDIES">BA COMM - SPECIALIZING IN NEW MEDIA STUDIES</option>
             <option value="BA COMM - SPECIALIZING IN SOCIAL COMMUNICATIONS">BA COMM - SPECIALIZING IN SOCIAL COMMUNICATIONS</option>
             <option value="BA in ECONOMICS">BA in ECONOMICS</option>
             <option value="BA in ENGLISH LANGUAGE STUDIES">BA in ENGLISH LANGUAGE STUDIES</option>
             <option value="BA HISTORY">BA HISTORY</option>
             <option value="BA PHILOSOPHY">BA PHILOSOPHY</option>
-            <option value="BS PSYCHOLOGY">BS PSYCHOLOGY</option>
-            <option value="BS SOCIAL WORK">BS SOCIAL WORK</option>
+            <option value="BS PSYCHOLOGY">BSPSYCH</option>
+            <option value="BS SOCIAL WORK">BSSW</option>
             <option value="BSMT">BSMT</option>
-            <option value="BS ACCOUNTANCY">BS ACCOUNTANCY</option>
+            <option value="BS ACCOUNTANCY">BSA</option>
             <option value="BSBA FIN-MANAGEMENT">BSBA FIN-MANAGEMENT</option>
-            <option value="BSBA - HUMAN RESOURCES MANAGEMENT">BSBA - HUMAN RESOURCES MANAGEMENT</option>
-            <option value="BSBA - MARKETING MANAGEMENT">BSBA - MARKETING MANAGEMENT</option>
-            <option value="BS CUSTOMS ADMINISTRATION">BS CUSTOMS ADMINISTRATION</option>
-            <option value="BS MANAGEMENT ACCOUNTING">BS MANAGEMENT ACCOUNTING</option>
-            <option value="BS REAL ESTATE MANAGEMENT">BS REAL ESTATE MANAGEMENT</option>
+            <option value="BSBA - HUMAN RESOURCES MANAGEMENT">BSBA - HRM</option>
+            <option value="BSBA - MARKETING MANAGEMENT">BSBA - MM</option>
+            <option value="BS CUSTOMS ADMINISTRATION">BSCA</option>
+            <option value="BS MANAGEMENT ACCOUNTING">BSMA</option>
+            <option value="BS REAL ESTATE MANAGEMENT">BSREM</option>
             <option value="BS EARLY CHILDHOOD EDUCATION">BS EARLY CHILDHOOD EDUCATION</option>
             <option value="BS ELEMENTARY EDUCATION">BS ELEMENTARY EDUCATION</option>
             <option value="BS PHYSICAL EDUCATION">BS PHYSICAL EDUCATION</option>
