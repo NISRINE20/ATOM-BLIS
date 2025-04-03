@@ -27,6 +27,12 @@ function UserPage() {
   const [activeTab, setActiveTab] = useState('Available');
   const [showCharts, setShowCharts] = useState(false); // New state for showing charts
   const [currentPage, setCurrentPage] = useState(1);
+  const [editRowId, setEditRowId] = useState(null); // Track which row is being edited
+const [editPassword, setEditPassword] = useState('');
+const [isDeletePasswordModalOpen, setIsDeletePasswordModalOpen] = useState(false); // State for delete confirmation modal
+const [deleteRowId, setDeleteRowId] = useState(null); // Track which row is being deleted
+const [deletePassword, setDeletePassword] = useState(''); // Password for delete confirmation
+const [isEditPasswordModalOpen, setIsEditPasswordModalOpen] = useState(false);
   const rowsPerPage = 10;
   const navigate = useNavigate();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -162,6 +168,58 @@ function UserPage() {
     setFilteredData(filtered);
     setIsFilterModalOpen(false);
   };
+  const handleEditClick = (rowId) => {
+    setEditRowId(rowId);
+    setIsEditPasswordModalOpen(true); // Open password modal
+  };
+  const handleEditPasswordSubmit = () => {
+  if (editPassword === 'sample') { // Replace 'sample' with the actual password
+    setIsEditPasswordModalOpen(false);
+    setEditPassword('');
+  } else {
+    alert('Incorrect password');
+  }
+};
+const handleDeleteClick = (rowId) => {
+  setDeleteRowId(rowId);
+  setIsDeletePasswordModalOpen(true); // Open delete confirmation modal
+};
+const handleEditPasswordModalClose = () => {
+  setIsEditPasswordModalOpen(false);
+  setEditPassword('');
+};
+const handleDeletePasswordSubmit = async () => {
+  if (deletePassword === 'hcdcpassword') { // Replace 'hcdcpassword' with the actual password
+    setIsDeletePasswordModalOpen(false);
+    setDeletePassword('');
+
+    // Update the status to "Deleted" in the database
+    const response = await fetch('https://vynceianoani.helioho.st/bliss/updateBookStatus.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: deleteRowId, status: 'Deleted' }),
+    });
+
+    if (response.ok) {
+      // Update the table data to hide the row
+      const updatedTableData = tableData.map((row) =>
+        row.id === deleteRowId ? { ...row, remarks: 'Deleted' } : row
+      );
+      setTableData(updatedTableData);
+      setFilteredData(updatedTableData.filter((row) => row.remarks !== 'Deleted')); // Filter out deleted rows
+    } else {
+      console.error('Failed to update status');
+    }
+  } else {
+    alert('Incorrect password');
+  }
+};
+const handleDeletePasswordModalClose = () => {
+  setIsDeletePasswordModalOpen(false);
+  setDeletePassword('');
+};
 
   const handleAddMaterialsClick = () => {
     setShowModal(true);
@@ -428,8 +486,8 @@ function UserPage() {
     <tr key={index}>
       <Td>{row.id}</Td>
       <Td>{row.date_received}</Td>
-      <Td>{row.class}</Td> {/* Material Category */}
-      <Td>{row.class2}</Td> {/* Class column mapped to class2 */}
+      <Td>{row.class}</Td>
+      <Td>{row.class2}</Td>
       <Td>{row.author}</Td>
       <Td>{row.title}</Td>
       <Td>{row.edition}</Td>
@@ -442,16 +500,24 @@ function UserPage() {
       <Td>{row.barcode}</Td>
       <Td>{row.department}</Td>
       <Td>
-        <select value={row.remarks} onChange={(e) => handleRemarksChange(e, row)}>
-          <option value="Available">Available</option>
-          <option value="Damage">Damage</option>
-          <option value="Lost">Lost</option>
-          <option value="Donate">Donate</option>
-        </select>
+        {editRowId === row.id ? (
+          <>
+            <select value={row.remarks} onChange={(e) => handleRemarksChange(e, row)}>
+              <option value="Available">Available</option>
+              <option value="Damage">Damage</option>
+              <option value="Lost">Lost</option>
+              <option value="Donate">Donate</option>
+            </select>
+            <button onClick={() => handleDeleteClick(row.id)}>Delete</button>
+          </>
+        ) : (
+          <button onClick={() => handleEditClick(row.id)}>Edit</button>
+        )}
       </Td>
     </tr>
   ))}
 </tbody>
+
             </Table>
           </TableWrapper>
           <PaginationContainer>
@@ -492,6 +558,31 @@ function UserPage() {
           required
         />
       </ConfirmationModal>
+      <ConfirmationModal isOpen={isEditPasswordModalOpen} onClose={handleEditPasswordModalClose} onConfirm={handleEditPasswordSubmit}>
+  <p><strong>Enter Password to Edit:</strong></p>
+  <input
+    type="password"
+    value={editPassword}
+    onChange={(e) => setEditPassword(e.target.value)}
+    style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ced4da', borderRadius: '5px', fontSize: '16px', transition: 'border-color 0.3s' }}
+    required
+  />
+</ConfirmationModal>
+<ConfirmationModal
+  isOpen={isDeletePasswordModalOpen}
+  onClose={handleDeletePasswordModalClose}
+  onConfirm={handleDeletePasswordSubmit}
+>
+  <p><strong>Are you sure you want to delete this record?</strong></p>
+  <p>Enter password to confirm:</p>
+  <input
+    type="password"
+    value={deletePassword}
+    onChange={(e) => setDeletePassword(e.target.value)}
+    style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ced4da', borderRadius: '5px', fontSize: '16px', transition: 'border-color 0.3s' }}
+    required
+  />
+</ConfirmationModal>
       <Chatbot />
       <FilterModal
         isOpen={isFilterModalOpen}
@@ -503,6 +594,7 @@ function UserPage() {
         tableData={tableData} // Pass tableData for filtering
       />
     </Container>
+    
   );
 }
 
