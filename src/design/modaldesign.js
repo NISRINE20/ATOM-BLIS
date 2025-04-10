@@ -15,14 +15,14 @@ export const ModalOverlay = styled.div`
 
 export const ModalContent = styled.div`
   background: white;
-  border-radius: 10px;
-  width: 700px;
+  border-radius: 20px;
+  width: 800px;
 `;
 
 export const ModalContent1 = styled.div`
   background: white;
   border-radius: 10px;
-  width: 700px;
+  width: 800px;
   padding: 30px;
 `;
 
@@ -43,11 +43,11 @@ export const ModalFooter = styled.div`
 export const Form = styled.form`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-right: 20px;
-  margin-left: 20px;
-  margin-top: 20px;
-  padding: 40px;
+  gap: 15px;
+  margin-right: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  padding: 15px;
 `;
 
 export const Input = styled.input`
@@ -55,7 +55,7 @@ export const Input = styled.input`
   font-size: 16px;
   border: 1px solid #ced4da;
   border-radius: 5px;
-`;
+  `;
 
 export const Select = styled.select`
   padding: 15px;

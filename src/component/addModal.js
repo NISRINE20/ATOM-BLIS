@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Modal from './modal';
 import { ModalContent, Form, Input, ButtonContainer, Button } from '../design/modaldesign';
 import styled from 'styled-components';
@@ -28,7 +28,38 @@ const StyledInput = styled(Input)`
   padding-left: 30px; /* Add space for the peso sign */
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+`;
+
 const AddModal = ({ isOpen, onClose, onSubmit }) => {
+  const [edition, setEdition] = useState('');
+  const [customEdition, setCustomEdition] = useState('');
+  const [volume, setVolume] = useState('');
+  const [customVolume, setCustomVolume] = useState('');
+
+  const handleEditionChange = (e) => {
+    const value = e.target.value;
+    setEdition(value);
+    if (value !== 'Others') {
+      setCustomEdition(''); // Clear custom input if not "Others"
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const value = e.target.value;
+    setVolume(value);
+    if (value !== 'Others') {
+      setCustomVolume(''); // Clear custom input if not "Others"
+    }
+  };
+
+
   return (
     <Modal isOpen={isOpen}>
       <ModalContent>
@@ -41,31 +72,83 @@ const AddModal = ({ isOpen, onClose, onSubmit }) => {
             <option value="Circulation">Circulation</option>
             <option value="Fiction">Fiction</option>
           </Select>
-          {/* Hidden input to map class to class2 */}
-          <Select name="class" required>
-  <option value="">Class</option>
-  <option value="000-099">000 - 099</option>
-  <option value="100-199">100 - 199</option>
-  <option value="200-299">200 - 299</option>
-  <option value="300-399">300 - 399</option>
-  <option value="400-499">400 - 499</option>
-  <option value="500-599">500 - 599</option>
-  <option value="600-699">600 - 699</option>
-  <option value="700-799">700 - 799</option>
-  <option value="800-899">800 - 899</option>
-  <option value="900-999">900 - 999</option>
-</Select>
+          <Select name="class2" required>
+            <option value="">Class</option>
+            <option value="000-099">000 - 099</option>
+            <option value="100-199">100 - 199</option>
+            <option value="200-299">200 - 299</option>
+            <option value="300-399">300 - 399</option>
+            <option value="400-499">400 - 499</option>
+            <option value="500-599">500 - 599</option>
+            <option value="600-699">600 - 699</option>
+            <option value="700-799">700 - 799</option>
+            <option value="800-899">800 - 899</option>
+            <option value="900-999">900 - 999</option>
+          </Select>
           <Input type="text" name="author" placeholder="Author" required />
           <Input type="text" name="title" placeholder="Title of Book" required />
-          <Input type="text" name="edition" placeholder="Edition" required />
-          <Input type="text" name="volume" placeholder="Volume" required />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Select name="edition" value={edition} onChange={handleEditionChange} required style={{ flex: '1' }}>
+            <option value="">Select Edition</option>
+            <option value="N/A">N/A</option>
+            <option value="1st ed.">1st ed.</option>
+            <option value="2nd ed.">2nd ed.</option>
+            <option value="3rd ed.">3rd ed.</option>
+            <option value="4th ed.">4th ed.</option>
+            <option value="5th ed.">5th ed.</option>
+            <option value="6th ed.">6th ed.</option>
+            <option value="7th ed.">7th ed.</option>
+            <option value="8th ed.">8th ed.</option>
+            <option value="9th ed.">9th ed.</option>
+            <option value="10th ed.">10th ed.</option>
+            <option value="Others">Others</option>
+          </Select>
+          {edition === 'Others' && (
+            <Input
+              type="text"
+              name="customEdition"
+              placeholder="Enter custom edition"
+              value={customEdition}
+              onChange={(e) => setCustomEdition(e.target.value)}
+              required
+              style={{ flex: '2' }} // Adjust width for the input
+            />
+          )}
+        </div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Select name="volume" value={volume} onChange={handleVolumeChange} required style={{ flex: '1' }}>
+              <option value="">Select Volume</option>
+              <option value="N/A">N/A</option>
+              <option value="Vol. 1">Vol. 1</option>
+              <option value="Vol. 2">Vol. 2</option>
+              <option value="Vol. 3">Vol. 3</option>
+              <option value="Vol. 4">Vol. 4</option>
+              <option value="Vol. 5">Vol. 5</option>
+              <option value="Vol. 6">Vol. 6</option>
+              <option value="Vol. 7">Vol. 7</option>
+              <option value="Vol. 8">Vol. 8</option>
+              <option value="Vol. 9">Vol. 9</option>
+              <option value="Vol. 10">Vol. 10</option>
+              <option value="Others">Others</option>
+            </Select>
+            {volume === 'Others' && (
+              <Input
+                type="text"
+                name="customVolume"
+                placeholder="Enter custom volume"
+                value={customVolume}
+                onChange={(e) => setCustomVolume(e.target.value)}
+                required
+                style={{ flex: '2' }}
+              />
+            )}
+          </div>
           <Input type="number" name="pages" placeholder="Pages" required />
           <Select name="recordOfSource" required>
             <option value="">Source of Fund</option>
             <option value="Purchased">Purchased</option>
             <option value="Donated">Donated</option>
           </Select>
-          {/* Cost Price with Peso Sign */}
           <InputWithPrefix>
             <PesoSign>₱</PesoSign>
             <StyledInput type="text" name="costPrice" placeholder="Cost Price" required />
@@ -111,7 +194,7 @@ const AddModal = ({ isOpen, onClose, onSubmit }) => {
             <option value="BS SECONDARY EDUCATION major in VALUES EDUCATION WITH CATECHETICS">BS SECONDARY EDUCATION major in VALUES EDUCATION WITH CATECHETICS</option>
             <option value="BACHELOR OF SPECIAL NEEDS EDUCATION GENERALIST">BACHELOR OF SPECIAL NEEDS EDUCATION GENERALIST</option>
           </Select>
-          <ReadOnlyInput type="text" name="remarks" value="Available" readOnly /> {/* Read-only input for remarks */}
+          <ReadOnlyInput type="text" name="remarks" value="Available" readOnly />
           <ButtonContainer>
             <Button type="button" onClick={onClose}>Cancel</Button>
             <Button type="submit" primary>Add</Button>
@@ -121,14 +204,5 @@ const AddModal = ({ isOpen, onClose, onSubmit }) => {
     </Modal>
   );
 };
-
-const Select = styled.select`
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-`;
 
 export default AddModal;

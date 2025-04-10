@@ -7,11 +7,14 @@ import ConfirmationModal from '../component/confirmationModal';
 import FilterModal from '../component/FilterModal';
 import SidebarComponent from './Sidebar';
 import Charts from './Charts';
+import EditModal from '../component/editRow';
 import { Container, Header, HeaderRight, Title, SearchBox, HelpText, MenuBar, TableContainer, Table, Th, Td, RecommendationItem, RecommendationModal, DownloadIcon, PaginationContainer, PaginationButton, TableWrapper } from "../design/homepagedesign"
 import Chatbot from '../component/Chatbot';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // Import Font Awesome icons
 
 function UserPage() {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for EditModal
+const [editFormData, setEditFormData] = useState({}); // State for the row being edited
   const [showModal, setShowModal] = useState(false);
   const [tableData, setTableData] = useState([]); // Ensure tableData is initialized as an empty array
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,12 +30,9 @@ function UserPage() {
   const [activeTab, setActiveTab] = useState('Available');
   const [showCharts, setShowCharts] = useState(false); // New state for showing charts
   const [currentPage, setCurrentPage] = useState(1);
-  const [editRowId, setEditRowId] = useState(null); // Track which row is being edited
-const [editPassword, setEditPassword] = useState('');
-const [isDeletePasswordModalOpen, setIsDeletePasswordModalOpen] = useState(false); // State for delete confirmation modal
-const [deleteRowId, setDeleteRowId] = useState(null); // Track which row is being deleted
-const [deletePassword, setDeletePassword] = useState(''); // Password for delete confirmation
-const [isEditPasswordModalOpen, setIsEditPasswordModalOpen] = useState(false);
+  const [isDeletePasswordModalOpen, setIsDeletePasswordModalOpen] = useState(false); // State for delete confirmation modal
+  const [deleteRowId, setDeleteRowId] = useState(null); // Track which row is being deleted
+  const [deletePassword, setDeletePassword] = useState(''); // Password for delete confirmation
   const rowsPerPage = 10;
   const navigate = useNavigate();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -168,25 +168,57 @@ const [isEditPasswordModalOpen, setIsEditPasswordModalOpen] = useState(false);
     setFilteredData(filtered);
     setIsFilterModalOpen(false);
   };
-  const handleEditClick = (rowId) => {
-    setEditRowId(rowId);
-    setIsEditPasswordModalOpen(true); // Open password modal
-  };
-  const handleEditPasswordSubmit = () => {
-  if (editPassword === 'sample') { // Replace 'sample' with the actual password
-    setIsEditPasswordModalOpen(false);
-    setEditPassword('');
-  } else {
-    alert('Incorrect password');
-  }
-};
+  
+
+
 const handleDeleteClick = (rowId) => {
   setDeleteRowId(rowId);
   setIsDeletePasswordModalOpen(true); // Open delete confirmation modal
 };
-const handleEditPasswordModalClose = () => {
-  setIsEditPasswordModalOpen(false);
-  setEditPassword('');
+const handleEditClick = (row) => {
+  setFormData(row); // Populate the form data with the selected row
+  setIsEditModalOpen(true); // Open the EditModal
+};
+const handleEditModalClose = () => {
+  setIsEditModalOpen(false); // Close the EditModal
+  setEditFormData({}); // Clear the edit form data
+};
+const handleEditFormSubmit = async () => {
+  try {
+    // Ensure the id is included in the formData
+    const payload = { ...formData, id: formData.id };
+
+    // Log the payload to the console for debugging
+    console.log('Payload being sent to the API:', payload);
+
+    const response = await fetch('https://vynceianoani.helioho.st/bliss/editbook.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload), // Send the updated form data with id
+    });
+
+    const result = await response.json(); // Parse the JSON response
+    console.log('API Response:', result); // Log the response for debugging
+
+    if (response.ok && result.success) {
+      // Update the table data with the edited row
+      const updatedTableData = tableData.map((row) =>
+        row.id === formData.id ? formData : row
+      );
+      setTableData(updatedTableData);
+      setFilteredData(updatedTableData);
+      setIsEditModalOpen(false); // Close the modal
+      alert('Record updated successfully!'); // Notify the user
+    } else {
+      console.error('Failed to update the record:', result.error || 'Unknown error');
+      alert(`Failed to update the record: ${result.error || 'Unknown error'}`); // Notify the user of the error
+    }
+  } catch (error) {
+    console.error('An error occurred:', error);
+    alert('An error occurred while updating the record. Please try again.'); // Notify the user of the error
+  }
 };
 const handleDeletePasswordSubmit = async () => {
   if (deletePassword === 'hcdcpassword') { // Replace 'hcdcpassword' with the actual password
@@ -194,7 +226,7 @@ const handleDeletePasswordSubmit = async () => {
     setDeletePassword('');
 
     // Update the status to "Deleted" in the database
-    const response = await fetch('https://vynceianoani.helioho.st/bliss/updateBookStatus.php', {
+    const response = await fetch('https://vynceianoani.helioho.st/bliss/deleteBook.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -227,6 +259,15 @@ const handleDeletePasswordModalClose = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
+  
+    // Replace "Others" with the custom edition value if applicable
+    if (formData.get('edition') === 'Others') {
+      formData.set('edition', formData.get('customEdition'));
+    }
+    if (formData.get('volume') === 'Others') {
+      formData.set('volume', formData.get('customVolume'));
+    }
+  
     const newData = {
       id: formData.get('id'),
       dateReceived: formData.get('dateReceived'),
@@ -234,7 +275,7 @@ const handleDeletePasswordModalClose = () => {
       class2: formData.get('class2'), // Map "class" to "class2" for the database
       author: formData.get('author'),
       title: formData.get('title'),
-      edition: formData.get('edition'),
+      edition: formData.get('edition'), // Updated to handle custom edition
       volume: formData.get('volume'),
       pages: formData.get('pages'),
       recordOfSource: formData.get('recordOfSource'),
@@ -397,7 +438,9 @@ const handleDeletePasswordModalClose = () => {
   };
 
   const columns = [
-    'NUMBER', 'DATE ACCESSION', 'MATERIAL CATEGORY', 'CLASS', 'AUTHOR', 'TITLE OF BOOK', 'EDITION', 'VOLUME', 'PAGES', 'SOURCE OF FUND', 'COST PRICE', 'PUBLISHER', 'YEAR', 'BARCODE', 'PROGRAM', 'REMARKS',
+    'NUMBER', 'DATE ACCESSION', 'MATERIAL CATEGORY', 'CLASS', 'AUTHOR', 'TITLE OF BOOK', 
+    'EDITION', 'VOLUME', 'PAGES', 'SOURCE OF FUND', 'COST PRICE', 'PUBLISHER', 
+    'YEAR', 'BARCODE', 'PROGRAM', 'REMARKS', 'ACTIONS',
   ];
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -499,25 +542,15 @@ const handleDeletePasswordModalClose = () => {
       <Td>{row.year}</Td>
       <Td>{row.barcode}</Td>
       <Td>{row.department}</Td>
+      <Td>{row.remarks}</Td> {/* Add the remarks column */}
       <Td>
-        {editRowId === row.id ? (
-          <>
-            <select value={row.remarks} onChange={(e) => handleRemarksChange(e, row)}>
-              <option value="Available">Available</option>
-              <option value="Damage">Damage</option>
-              <option value="Lost">Lost</option>
-              <option value="Donate">Donate</option>
-            </select>
-            <button onClick={() => handleDeleteClick(row.id)}>Delete</button>
-          </>
-        ) : (
-          <button onClick={() => handleEditClick(row.id)}>Edit</button>
-        )}
+      <button onClick={() => handleEditClick(row)} style={{ marginRight: '10px' }}>Edit</button>
+
+        <button onClick={() => handleDeleteClick(row.id)}>Delete</button> {/* Delete button */}
       </Td>
     </tr>
   ))}
 </tbody>
-
             </Table>
           </TableWrapper>
           <PaginationContainer>
@@ -532,22 +565,31 @@ const handleDeletePasswordModalClose = () => {
         </TableContainer>
       )}
       <AddModal isOpen={showModal} onClose={() => setShowModal(false)} onSubmit={handleFormSubmit} />
-      <ConfirmationModal isOpen={isModalOpen} onClose={handleModalClose} onConfirm={handleModalConfirm}>
-        <p><strong>Date Received:</strong> {formData.dateReceived}</p>
-        <p><strong>Class:</strong> {formData.class}</p>
-        <p><strong>Author:</strong> {formData.author}</p>
-        <p><strong>Title:</strong> {formData.title}</p>
-        <p><strong>Edition:</strong> {formData.edition}</p>
-        <p><strong>Volume:</strong> {formData.volume}</p>
-        <p><strong>Pages:</strong> {formData.pages}</p>
-        <p><strong>Record of Source:</strong> {formData.recordOfSource}</p>
-        <p><strong>Cost Price:</strong> {formData.costPrice}</p>
-        <p><strong>Publisher:</strong> {formData.publisher}</p>
-        <p><strong>Year:</strong> {formData.year}</p>
-        <p><strong>Barcode:</strong> {formData.barcode}</p>
-        <p><strong>Department:</strong> {formData.department}</p>
-        <p><strong>Remarks:</strong> {formData.remarks}</p>
-      </ConfirmationModal>
+      <ConfirmationModal
+  isOpen={isModalOpen}
+  onClose={handleModalClose}
+  onConfirm={handleModalConfirm}
+  onBack={() => {
+    setIsModalOpen(false); // Close the confirmation modal
+    setShowModal(true); // Reopen the AddModal
+  }}
+>
+  <p><strong>Date Received:</strong> {formData.dateReceived}</p>
+  <p><strong>Material Category:</strong> {formData.class}</p>
+  <p><strong>Class:</strong> {formData.class2}</p>
+  <p><strong>Author:</strong> {formData.author}</p>
+  <p><strong>Title:</strong> {formData.title}</p>
+  <p><strong>Edition:</strong> {formData.edition}</p>
+  <p><strong>Volume:</strong> {formData.volume}</p>
+  <p><strong>Pages:</strong> {formData.pages}</p>
+  <p><strong>Record of Source:</strong> {formData.recordOfSource}</p>
+  <p><strong>Cost Price:</strong> {formData.costPrice}</p>
+  <p><strong>Publisher:</strong> {formData.publisher}</p>
+  <p><strong>Year:</strong> {formData.year}</p>
+  <p><strong>Barcode:</strong> {formData.barcode}</p>
+  <p><strong>Department:</strong> {formData.department}</p>
+  <p><strong>Remarks:</strong> {formData.remarks}</p>
+</ConfirmationModal>
       <ConfirmationModal isOpen={isPasswordModalOpen} onClose={handlePasswordModalClose} onConfirm={handlePasswordSubmit}>
         <p><strong>Enter Password to Download PDF:</strong></p>
         <input
@@ -558,16 +600,7 @@ const handleDeletePasswordModalClose = () => {
           required
         />
       </ConfirmationModal>
-      <ConfirmationModal isOpen={isEditPasswordModalOpen} onClose={handleEditPasswordModalClose} onConfirm={handleEditPasswordSubmit}>
-  <p><strong>Enter Password to Edit:</strong></p>
-  <input
-    type="password"
-    value={editPassword}
-    onChange={(e) => setEditPassword(e.target.value)}
-    style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ced4da', borderRadius: '5px', fontSize: '16px', transition: 'border-color 0.3s' }}
-    required
-  />
-</ConfirmationModal>
+      
 <ConfirmationModal
   isOpen={isDeletePasswordModalOpen}
   onClose={handleDeletePasswordModalClose}
@@ -583,6 +616,154 @@ const handleDeletePasswordModalClose = () => {
     required
   />
 </ConfirmationModal>
+<EditModal
+  isOpen={isEditModalOpen}
+  onClose={handleEditModalClose}
+  onSubmit={handleEditFormSubmit} // Use onSubmit instead of onSave
+>
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr', // Two equal-width columns
+      columnGap: '40px', // Space between columns
+      rowGap: '20px', // Space between rows
+    }}
+  >
+    {/* Column 1 */}
+    <div>
+      <label><strong>ID:</strong></label>
+      <input
+        type="text"
+        value={formData.id || ''}
+        readOnly // Make the ID field read-only
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Date Received:</strong></label>
+      <input
+        type="date"
+        value={formData.date_received || ''}
+        onChange={(e) => setFormData({ ...formData, date_received: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Material Category:</strong></label>
+      <input
+        type="text"
+        value={formData.class || ''}
+        onChange={(e) => setFormData({ ...formData, class: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Class:</strong></label>
+      <input
+        type="text"
+        value={formData.class2 || ''}
+        onChange={(e) => setFormData({ ...formData, class2: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Author:</strong></label>
+      <input
+        type="text"
+        value={formData.author || ''}
+        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Title:</strong></label>
+      <input
+        type="text"
+        value={formData.title || ''}
+        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Edition:</strong></label>
+      <input
+        type="text"
+        value={formData.edition || ''}
+        onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Volume:</strong></label>
+      <input
+        type="text"
+        value={formData.volume || ''}
+        onChange={(e) => setFormData({ ...formData, volume: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+    </div>
+
+    {/* Column 2 */}
+    <div>
+      <label><strong>Pages:</strong></label>
+      <input
+        type="number"
+        value={formData.pages || ''}
+        onChange={(e) => setFormData({ ...formData, pages: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Record of Source:</strong></label>
+      <input
+        type="text"
+        value={formData.record_of_source || ''}
+        onChange={(e) => setFormData({ ...formData, record_of_source: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Cost Price:</strong></label>
+      <input
+        type="number"
+        value={formData.cost_price || ''}
+        onChange={(e) => setFormData({ ...formData, cost_price: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Publisher:</strong></label>
+      <input
+        type="text"
+        value={formData.publisher || ''}
+        onChange={(e) => setFormData({ ...formData, publisher: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Year:</strong></label>
+      <input
+        type="number"
+        value={formData.year || ''}
+        onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Barcode:</strong></label>
+      <input
+        type="text"
+        value={formData.barcode || ''}
+        onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Department:</strong></label>
+      <input
+        type="text"
+        value={formData.department || ''}
+        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+
+      <label><strong>Remarks:</strong></label>
+      <input
+        type="text"
+        value={formData.remarks || ''}
+        onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+    </div>
+  </div>
+</EditModal>
       <Chatbot />
       <FilterModal
         isOpen={isFilterModalOpen}
@@ -591,7 +772,7 @@ const handleDeletePasswordModalClose = () => {
         onFilterChange={handleFilterChange}
         onApplyFilters={handleApplyFilters}
         setFilteredData={setFilteredData} // Pass setFilteredData to update the table
-        tableData={tableData} // Pass tableData for filtering
+        tableData={tableData} // Pass tableData for 
       />
     </Container>
     
