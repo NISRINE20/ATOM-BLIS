@@ -85,6 +85,7 @@ const AddModal = ({ isOpen, onClose, onSubmit }) => {
             <option value="800-899">800 - 899</option>
             <option value="900-999">900 - 999</option>
           </Select>
+          <Input type="text" name="call_number" placeholder="Call Number" required />
           <Input type="text" name="author" placeholder="Author" required />
           <Input type="text" name="title" placeholder="Title of Book" required />
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

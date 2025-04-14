@@ -40,6 +40,7 @@ const [editFormData, setEditFormData] = useState({}); // State for the row being
     id: '',
     material_category: '', // Added Material Category
     class: '', // Added Material Category
+    call_number: '',
     date_received: '',
     title: '',
     author: '',
@@ -271,7 +272,9 @@ const handleDeletePasswordModalClose = () => {
     const newData = {
       id: formData.get('id'),
       dateReceived: formData.get('dateReceived'),
-      class: formData.get('class'), // This is the user-facing "class"
+      class: formData.get('class'), 
+      call_number: formData.get('call_number'), // This is the user-facing "class"
+// This is the user-facing "class"
       class2: formData.get('class2'), // Map "class" to "class2" for the database
       author: formData.get('author'),
       title: formData.get('title'),
@@ -438,7 +441,7 @@ const handleDeletePasswordModalClose = () => {
   };
 
   const columns = [
-    'NUMBER', 'DATE ACCESSION', 'MATERIAL CATEGORY', 'CLASS', 'AUTHOR', 'TITLE OF BOOK', 
+    'NUMBER', 'DATE ACCESSION', 'MATERIAL CATEGORY', 'CLASS','CALL NUMBER', 'AUTHOR', 'TITLE OF BOOK', 
     'EDITION', 'VOLUME', 'PAGES', 'SOURCE OF FUND', 'COST PRICE', 'PUBLISHER', 
     'YEAR', 'BARCODE', 'PROGRAM', 'REMARKS', 'ACTIONS',
   ];
@@ -484,7 +487,7 @@ const handleDeletePasswordModalClose = () => {
       ) : (
         <TableContainer id="table-container">
           <Header>
-            <Title>DIGITAL ACCESSION RECORDS</Title>
+            <Title>Ascension X</Title>
             <HeaderRight>
               <SearchBox
                 type="text"
@@ -531,6 +534,7 @@ const handleDeletePasswordModalClose = () => {
       <Td>{row.date_received}</Td>
       <Td>{row.class}</Td>
       <Td>{row.class2}</Td>
+      <Td>{row.call_number}</Td>
       <Td>{row.author}</Td>
       <Td>{row.title}</Td>
       <Td>{row.edition}</Td>
@@ -577,6 +581,7 @@ const handleDeletePasswordModalClose = () => {
   <p><strong>Date Received:</strong> {formData.dateReceived}</p>
   <p><strong>Material Category:</strong> {formData.class}</p>
   <p><strong>Class:</strong> {formData.class2}</p>
+  <p><strong>Call Number:</strong> {formData.call_number}</p>
   <p><strong>Author:</strong> {formData.author}</p>
   <p><strong>Title:</strong> {formData.title}</p>
   <p><strong>Edition:</strong> {formData.edition}</p>
@@ -660,6 +665,13 @@ const handleDeletePasswordModalClose = () => {
         type="text"
         value={formData.class2 || ''}
         onChange={(e) => setFormData({ ...formData, class2: e.target.value })}
+        style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
+      />
+<label><strong>Call Number:</strong></label>
+      <input
+        type="text"
+        value={formData.call_number || ''}
+        onChange={(e) => setFormData({ ...formData, call_number: e.target.value })}
         style={{ marginBottom: '10px', padding: '10px', width: '100%' }}
       />
 

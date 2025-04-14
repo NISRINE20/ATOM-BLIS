@@ -67,6 +67,15 @@ const FilterModal = ({ isOpen, onClose, filters, onFilterChange, setFilteredData
             />
           </label>
           <label style={modalStyles.label}>
+            Call Number:
+            <input
+              type="text"
+              value={filters.call_number}
+              onChange={(e) => handleInputChange('call_number', e.target.value)}
+              style={modalStyles.input}
+            />
+          </label>
+          <label style={modalStyles.label}>
             Date Received:
             <input
               type="date"

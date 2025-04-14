@@ -58,17 +58,20 @@ const Charts = ({ handleDownloadClick }) => {
       let endpoint;
       if (filterType === 'Material Category') {
         endpoint = timeFrame === 'Monthly' ? 'graph.php' : timeFrame === 'Semestral' ? 'graphSemestral.php' : 'graphYearly.php';
-      } else {
+      } else if (filterType === 'Program') {
         endpoint = timeFrame === 'Monthly' ? 'graphProgram.php' : timeFrame === 'Semestral' ? 'graphProgramSemestral.php' : 'graphProgramYearly.php';
+      } else if (filterType === 'Class') { // Add logic for Class
+        endpoint = timeFrame === 'Monthly' ? 'graphClass.php' : timeFrame === 'Semestral' ? 'graphClassSemestral.php' : 'graphClassYearly.php';
       }
+  
       try {
         const response = await axios.get(`https://vynceianoani.helioho.st/bliss/${endpoint}`);
         const data = response.data;
         const chartData = {};
-
+  
         data.forEach(item => {
-          const { classification, department, month, semester, year, count } = item;
-          const key = filterType === 'Material Category' ? classification : department;
+          const { classification, department, class: className, month, semester, year, count } = item;
+          const key = filterType === 'Material Category' ? classification : filterType === 'Program' ? department : className; // Handle Class
           const label = timeFrame === 'Monthly' ? month : timeFrame === 'Semestral' ? semester : year;
           if (!chartData[key]) {
             chartData[key] = { labels: [], data: [] };
@@ -76,14 +79,14 @@ const Charts = ({ handleDownloadClick }) => {
           chartData[key].labels.push(label);
           chartData[key].data.push(Math.round(count)); // Round the count to the nearest integer
         });
-
+  
         setChartData(chartData);
         setSelectedClassification(Object.keys(chartData)[0]); // Set the first classification as default
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
+  
     fetchData();
   }, [filterType, timeFrame]);
 
@@ -167,13 +170,14 @@ const Charts = ({ handleDownloadClick }) => {
             <option value="Pie">Pie Chart</option>
           </select>
           <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            style={{ marginLeft: '20px' }}
-          >
-            <option value="Material Category">Material Category</option>
-            <option value="Program">Program</option>
-          </select>
+  value={filterType}
+  onChange={(e) => setFilterType(e.target.value)}
+  style={{ marginLeft: '20px' }}
+>
+  <option value="Material Category">Material Category</option>
+  <option value="Program">Program</option>
+  <option value="Class">Class</option> {/* Add Class as a filter option */}
+</select>
           <select
             value={timeFrame}
             onChange={(e) => setTimeFrame(e.target.value)}
