@@ -487,7 +487,7 @@ const handleDeletePasswordModalClose = () => {
       ) : (
         <TableContainer id="table-container">
           <Header>
-            <Title>Ascension X</Title>
+            <Title>AscensionX</Title>
             <HeaderRight>
               <SearchBox
                 type="text"
@@ -530,7 +530,7 @@ const handleDeletePasswordModalClose = () => {
               <tbody>
   {filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((row, index) => (
     <tr key={index}>
-      <Td>{row.id}</Td>
+      <Td>{index + 1 + (currentPage - 1) * rowsPerPage}</Td> {/* Replace id with numbering */}
       <Td>{row.date_received}</Td>
       <Td>{row.class}</Td>
       <Td>{row.class2}</Td>
@@ -546,11 +546,10 @@ const handleDeletePasswordModalClose = () => {
       <Td>{row.year}</Td>
       <Td>{row.barcode}</Td>
       <Td>{row.department}</Td>
-      <Td>{row.remarks}</Td> {/* Add the remarks column */}
+      <Td>{row.remarks}</Td>
       <Td>
-      <button onClick={() => handleEditClick(row)} style={{ marginRight: '10px' }}>Edit</button>
-
-        <button onClick={() => handleDeleteClick(row.id)}>Delete</button> {/* Delete button */}
+        <button onClick={() => handleEditClick(row)} style={{ marginRight: '10px' }}>Edit</button>
+        <button onClick={() => handleDeleteClick(row.id)}>Delete</button>
       </Td>
     </tr>
   ))}

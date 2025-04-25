@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import '../App.css';
 import { Container, LoginBox, Title, ErrorMessage, Input, Button } from '../design/design';
 import { Label, Link } from '../design/design';
+import logo from './logo.jpg';
+
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -33,7 +35,7 @@ function Login() {
   return (
     <Container>
       <LoginBox>
-        <Title>AccessionX</Title>
+        <img src={logo} alt="Logo" style={{ width: '300px', height: '300px' }} />
         <p>SIGN IN</p>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <form onSubmit={handleLogin}>
