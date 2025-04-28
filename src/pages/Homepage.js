@@ -501,7 +501,7 @@ const currentRows = [...filteredData].slice(indexOfFirstRow, indexOfLastRow); //
       ) : (
         <TableContainer id="table-container">
           <Header>
-            <Title>AccensionX</Title>
+            <Title>AccenssionX</Title>
             <HeaderRight>
               <SearchBox
                 type="text"
