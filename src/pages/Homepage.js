@@ -460,8 +460,8 @@ const handleDeletePasswordModalClose = () => {
     'YEAR', 'BARCODE', 'PROGRAM', 'REMARKS', 'ACTIONS',
   ];
   const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+const currentRows = [...filteredData].slice(indexOfFirstRow, indexOfLastRow); // Ensure slicing is applied to the sorted data
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
@@ -545,12 +545,12 @@ const handleDeletePasswordModalClose = () => {
                 </tr>
               </thead>
               <tbody>
-  {filteredData.map((row, index) => (
+  {currentRows.map((row, index) => (
     <tr key={index}>
       <Td>
         {sortOrder === 'asc'
-          ? index + 1 // Sequential numbering for ascending order
-          : filteredData.length - index} {/* Reverse numbering for descending order */}
+          ? index + 1 + (currentPage - 1) * rowsPerPage // Sequential numbering for ascending order
+          : filteredData.length - (index + (currentPage - 1) * rowsPerPage)} {/* Reverse numbering for descending order */}
       </Td>
       <Td>{row.date_received}</Td>
       <Td>{row.class}</Td>
