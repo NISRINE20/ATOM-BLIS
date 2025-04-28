@@ -19,6 +19,7 @@ const [editFormData, setEditFormData] = useState({}); // State for the row being
   const [tableData, setTableData] = useState([]); // Ensure tableData is initialized as an empty array
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+  const [sortOrder, setSortOrder] = useState('asc'); // Default to ascending
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [isDashboardVisible, setIsDashboardVisible] = useState(true);
   const [userName, setUserName] = useState('');
@@ -80,11 +81,11 @@ const [editFormData, setEditFormData] = useState({}); // State for the row being
     const fetchData = async () => {
       const response = await fetch('https://vynceianoani.helioho.st/bliss/getbook.php');
       const data = await response.json();
-      const sortedData = data.sort((a, b) => b.id - a.id); // Sort in descending order by id
+      const sortedData = data.sort((a, b) => a.id - b.id); // Sort in ascending order by id
       setTableData(sortedData);
       setFilteredData(sortedData);
     };
-
+  
     fetchData();
   }, []);
 
@@ -294,7 +295,20 @@ const handleDeletePasswordModalClose = () => {
     setIsModalOpen(true);
     setShowModal(false);
   };
-
+  const handleSortChange = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; // Toggle between ascending and descending
+    setSortOrder(newSortOrder);
+  
+    const sortedData = [...filteredData].sort((a, b) => {
+      if (newSortOrder === 'asc') {
+        return a.id - b.id; // Sort ascending by id
+      } else {
+        return b.id - a.id; // Sort descending by id
+      }
+    });
+  
+    setFilteredData(sortedData); // Update the filtered data with the sorted data
+  };
   const handleSearchChange = (event) => {
     const value = event.target.value.toLowerCase();
     setSearchTerm(value);
@@ -487,7 +501,7 @@ const handleDeletePasswordModalClose = () => {
       ) : (
         <TableContainer id="table-container">
           <Header>
-            <Title>AscensionX</Title>
+            <Title>AccensionX</Title>
             <HeaderRight>
               <SearchBox
                 type="text"
@@ -496,6 +510,9 @@ const handleDeletePasswordModalClose = () => {
                 onChange={handleSearchChange}
                 style={{ marginRight: '10px' }}
               />
+              <button onClick={handleSortChange} style={{ marginLeft: '10px' }}>
+  Sort {sortOrder === 'asc' ? 'Descending' : 'Ascending'}
+</button>
               {showRecommendations && (
                 <RecommendationModal>
                   {filteredData.map((item, index) => (
@@ -528,9 +545,13 @@ const handleDeletePasswordModalClose = () => {
                 </tr>
               </thead>
               <tbody>
-  {filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((row, index) => (
+  {filteredData.map((row, index) => (
     <tr key={index}>
-      <Td>{index + 1 + (currentPage - 1) * rowsPerPage}</Td> {/* Replace id with numbering */}
+      <Td>
+        {sortOrder === 'asc'
+          ? index + 1 // Sequential numbering for ascending order
+          : filteredData.length - index} {/* Reverse numbering for descending order */}
+      </Td>
       <Td>{row.date_received}</Td>
       <Td>{row.class}</Td>
       <Td>{row.class2}</Td>
