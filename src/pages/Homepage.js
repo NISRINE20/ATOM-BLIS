@@ -501,7 +501,7 @@ const currentRows = [...filteredData].slice(indexOfFirstRow, indexOfLastRow); //
       ) : (
         <TableContainer id="table-container">
           <Header>
-            <Title>AccenssionX</Title>
+            <Title>AccessionX</Title>
             <HeaderRight>
               <SearchBox
                 type="text"
@@ -530,7 +530,7 @@ const currentRows = [...filteredData].slice(indexOfFirstRow, indexOfLastRow); //
               <select value={activeTab} onChange={handleTabClick} style={{ marginRight: '10px' }}>
                 <option value="Remarks">All</option>
                 <option value="Lost">Lost</option>
-                <option value="Donate">Donate</option>
+                <option value="Donate">Donated</option>
                 <option value="Damage">Damage</option>
                 <option value="Available">Available</option>
               </select>
